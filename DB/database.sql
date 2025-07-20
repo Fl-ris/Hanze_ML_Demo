@@ -7,4 +7,6 @@ voorspelling_correct boolean
 
 );
 
-insert into vragenlijst_data(leeftijd, gewicht, lengte) values(23, 70, 180)
+insert into vragenlijst_data(leeftijd, gewicht, lengte) values(23, 70, 180);
+insert into vragenlijst_data(leeftijd, gewicht, lengte) values(18, 60, 160);
+insert into vragenlijst_data(leeftijd, gewicht, lengte) values(17, 62, 163);
