@@ -8,18 +8,16 @@ def connect_database():
     """
 
     try:
-            #To-do: Pad relatief maken....
-        with open("/home/floris/Documenten/Github/Hanze_ML_Demo/DB/database.sql", "r") as sql_file:
+
+        with open("DB/database.sql", "r") as sql_file:
             sql_script = sql_file.read()
 
-        db = sqlite3.connect(database="database")
+
+        db = sqlite3.connect(database="DB/database.db")
         cursor = db.cursor()
         
         cursor.executescript(sql_script)
         db.commit()
-
-        df = pd.read_sql_query("select * from vragenlijst_data;", db)
-        print(df)
 
         return db
 
@@ -28,13 +26,15 @@ def connect_database():
 
 
 def make_dataframe(db):
-    pass
+    df = pd.read_sql_query("select * from vragenlijst_data;", db)
+    print(df)
+    return df
 
 
 
 def main():
     db = connect_database()
-    make_dataframe(db)
+    df = make_dataframe(db)
 
 if __name__ == "__main__":
     main()
