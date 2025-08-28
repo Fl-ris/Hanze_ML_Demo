@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, callback, Output, Input
+from dash import Dash, html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
@@ -22,18 +22,20 @@ app.layout = html.Div([
 
             dbc.Label("Gewicht", width="auto"),
             dbc.Col(
-                dbc.Input(id="weight_input",type="number", placeholder="Type hier je gewicht (kg)"),
+                dbc.Input(id="weight_input", type="number", placeholder="Type hier je gewicht (kg)"),
                 className="me-3",
             ),
         
             dbc.Label("Lengte", width="auto"),
             dbc.Col(
-                dbc.Input(id="length_input",type="number", placeholder="Type hier je lengte (cm)"),
+                dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)"),
                 className="me-3",
             ),
             
-            dbc.Button("Voorspel leeftijd!",id="submit_button", color="primary", size="lg"),
-        
+            dbc.Button("Voorspel leeftijd!", n_clicks=0, id="submit_button", color="primary", size="lg"),
+
+            # Verborgen variablen om de input waarden in op te slaan:
+            dcc.Store(id="var_store"),
         ],
 
         className="g-2",
@@ -72,7 +74,7 @@ app.layout = html.Div([
     Output("submit_button", "disabled"),
     Input("age_input","value"),
     Input("weight_input", "value"),
-    Input("length_input","value"),
+    Input("height_input","value"),
 )
 
 def submit_button_activate(leeftijd,gewicht,lengte):
@@ -86,8 +88,23 @@ def submit_button_activate(leeftijd,gewicht,lengte):
     # To-do: extra clausules toevoegen voor rare waarden etc. 
 
 
+@app.callback(
+    Output("var_store","data"),
+    Input("submit_button","n_clicks"),
+    State("age_input","value"),
+    State("weight_input","value"),
+    State("height_input","value"),
+    prevent_initial_call = True
+)
+
+def test_func(n_clicks,age_input,weight_input,height_input):
+            
+            print(age_input)
+            print(weight_input)
+            print(height_input)
 
 
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app.run(debug=True)
