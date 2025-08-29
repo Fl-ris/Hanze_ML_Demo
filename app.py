@@ -1,7 +1,21 @@
+"""
+Dash dashboard
+Datum: 29-08-2025
+Autheur: Floris Menninga
+Versie: 0.1
+"""
+
+
 from dash import Dash, html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
+
+
+from ML import data_check, visualize_df # Imports van het machine learning script.
+from main import make_dataframe, connect_database
+
+
 
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], serve_locally=False)
 
@@ -11,7 +25,7 @@ app.css.append_css({
 
 app.layout = html.Div([
     dcc.Tabs([
-        dcc.Tab(label='Voorspel je leeftijd', children=[
+        dcc.Tab(label='Begin hier!', children=[
     dbc.Row(
         [
             dbc.Label("Leeftijd", width="auto"),
@@ -41,19 +55,10 @@ app.layout = html.Div([
         className="g-2",
     )
         ]),
-        dcc.Tab(label='Tab two', children=[
-            dcc.Graph(
-                figure={
-                    'data': [
-                        {'x': [1, 2, 3], 'y': [1, 4, 1],
-                            'type': 'bar', 'name': 'SF'},
-                        {'x': [1, 2, 3], 'y': [1, 2, 3],
-                         'type': 'bar', 'name': 'Montréal'},
-                    ]
-                }
-            )
-        ]),
-        dcc.Tab(label='Tab three', children=[
+
+        # Tabblad om een grafiek met voorgaande voorspellingen te zien.
+        dcc.Tab(label='Voorgaande voorspellingen', children=[
+        dcc.Graph(id="test_graph"),
             dcc.Graph(
                 figure={
                     'data': [
@@ -65,9 +70,19 @@ app.layout = html.Div([
                 }
             )
         ]),
+
+        
+        # Tab met informatie over het ML model dat gebruikt wordt om de voorspellingen te maken.
+        dcc.Tab(label='Hoe werkt dit?', children=[
+        dcc.Markdown("""
+                    ## Placeholder ##
+                     **informatie hier...**
+
+                    """)
+                     
+        ]),
     ])
 ])
-
 
 
 @app.callback(
@@ -98,11 +113,30 @@ def submit_button_activate(leeftijd,gewicht,lengte):
 )
 
 def test_func(n_clicks,age_input,weight_input,height_input):
-            
-            print(age_input)
-            print(weight_input)
-            print(height_input)
 
+    print(age_input)
+    print(weight_input)
+    print(height_input)
+
+
+@app.callback(
+    Output("test_graph","figure"),
+    Input("submit_button","n_clicks"),
+    State("age_input","value"),
+    State("weight_input","value"),
+    prevent_initial_call = True
+)
+
+def test_graphh(n_clicks,age_input, weight_input):
+
+    test_df = pd.DataFrame({"age_input": [1,2,3],"weight_input": [3,4,5]}) # Test...
+
+    fig = px.scatter(test_df, x="age_input", y="weight_input")
+    return fig
+
+
+def save_to_database():
+    pass
 
 
 
