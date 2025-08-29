@@ -30,26 +30,27 @@ app.layout = html.Div([
         [
             dbc.Label("Leeftijd", width="auto"),
             dbc.Col(
-                dbc.Input(id="age_input", type="number", placeholder="Type hier je leeftijd (jaren)"),
+                dbc.Input(id="age_input", type="number", placeholder="Type hier je leeftijd (jaren)",size="lg"),
                 className="me-3",
             ),
 
             dbc.Label("Gewicht", width="auto"),
             dbc.Col(
-                dbc.Input(id="weight_input", type="number", placeholder="Type hier je gewicht (kg)"),
+                dbc.Input(id="weight_input", type="number", placeholder="Type hier je gewicht (kg)",size="lg"),
                 className="me-3",
             ),
         
             dbc.Label("Lengte", width="auto"),
             dbc.Col(
-                dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)"),
+                dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
                 className="me-3",
             ),
             
-            dbc.Button("Voorspel leeftijd!", n_clicks=0, id="submit_button", color="primary", size="lg"),
+            dbc.Button([dbc.Spinner(size="sm", show_initially="False"), "Voorspel leeftijd!"],n_clicks=0, id="submit_button",color="primary", size="lg"),
 
             # Verborgen variablen om de input waarden in op te slaan:
             dcc.Store(id="var_store"),
+            dcc.Store(id="var_store_for_database"),
         ],
 
         className="g-2",
@@ -114,9 +115,15 @@ def submit_button_activate(leeftijd,gewicht,lengte):
 
 def test_func(n_clicks,age_input,weight_input,height_input):
 
-    print(age_input)
-    print(weight_input)
-    print(height_input)
+    db = connect_database()
+    df = make_dataframe(db)
+
+    new_row = {"leeftijd": age_input,"gewicht": weight_input, "lengte": height_input}
+    df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+
+   # df = df.loc[len(df)] = [age_input,weight_input,height_input]
+
+    print(df)
 
 
 @app.callback(
@@ -127,7 +134,7 @@ def test_func(n_clicks,age_input,weight_input,height_input):
     prevent_initial_call = True
 )
 
-def test_graphh(n_clicks,age_input, weight_input):
+def test_graph(n_clicks,age_input, weight_input):
 
     test_df = pd.DataFrame({"age_input": [1,2,3],"weight_input": [3,4,5]}) # Test...
 
@@ -135,8 +142,18 @@ def test_graphh(n_clicks,age_input, weight_input):
     return fig
 
 
-def save_to_database():
-    pass
+
+@app.callback(
+    Output("var_store_for_database","data"),
+    Input("submit_button","n_clicks"),
+    prevent_initial_call = True
+)
+
+def save_to_database(n_clicks):
+    db = connect_database()
+    df = make_dataframe(db)
+    print(df)
+
 
 
 

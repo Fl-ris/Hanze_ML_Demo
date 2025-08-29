@@ -26,15 +26,36 @@ def connect_database():
 
 
 def make_dataframe(db):
+    """
+    Maak een pandas dataframe van de Sqlite3 database.
+    """
     df = pd.read_sql_query("select * from vragenlijst_data;", db)
-    print(df)
     return df
+
+
+def dataframe2database(df):
+    """
+    Om de nieuwe waarden van het dataframe in de database op te nemen.
+    """
+    db = sqlite3.connect(database="DB/database.db")
+
+    df.to_sql('schedule', db, if_exists='append')
+    db.close()
+
+
+
 
 
 
 def main():
+
+    # In deze volgorde zal het Dash dashboard deze functies gebruiken...
     db = connect_database()
+    
     df = make_dataframe(db)
+
+    db = dataframe2database(df)
+
 
 if __name__ == "__main__":
     main()
