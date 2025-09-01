@@ -20,7 +20,7 @@ from main import make_dataframe
 def data_check(df):
     df_valid = False
 
-    if df != None:
+    if df is not None:
         nas = df[["gewicht", "leeftijd", "lengte"]].isna().sum() # Verkrijg lijst met NA's voor elke kolom (behalve de "voorspelling_correct" kolom )
         na_sum = nas.sum() # Sommeer de NA's van elke kolom
 
@@ -29,8 +29,8 @@ def data_check(df):
         else:
             df_valid = True
             return df_valid 
-
-    return df_valid
+    else:
+        return df_valid
 
 
 def visualize_df(df, df_valid):
@@ -38,32 +38,27 @@ def visualize_df(df, df_valid):
     Om de gegevens te visualizeren die al aanwezig zijn in de database
     """
 
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.hist(df['leeftijd'])
-
-    ax.set_title('Age distribution')
-    ax.set_xlabel('Age')
-    ax.set_ylabel('Count')
-    plt.tight_layout()
-    plt.show()
-
-    if df_valid:
-        df.hist()
-
-
-
-
-
-
-    
-    pass
+    # Paarsgewijze correlaties:
+    axs = sns.heatmap(df[["social_media", "mp3_speler", "krant", "telefoon", "bellen_of_email", "smileys"]].corr(), annot=True, annot_kws={"fontsize": "x-small"}, cmap="jet", vmin=0.0, vmax=1.0, square=True)
+    axs.set_title("Paarsgewijze correlaties ($R$)")
+        
+    # Histogram    
+    df.hist( figsize=(16.0, 15));
 
 
 
 
 
 def train():
-    pass
+    
+    features_ordinal = ["telefoon"]
+    features_categorical = ["mp3_speler", "krant", "bellen_of_email", "smileys"]
+
+    to_predict = ["voorspelde_generatie"]
+
+    all_features = features_ordinal + features_categorical
+
+
 
 
 
@@ -77,7 +72,7 @@ def main():
 
     df = make_dataframe(db) # Maak pandas dataframe van SQLite database
     
-    df_valid = data_check(df)
+    df_valid = data_check(df) 
 
     visualize_df(df, df_valid) 
 
