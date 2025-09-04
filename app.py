@@ -13,7 +13,7 @@ import pandas as pd
 
 
 from ML import data_check, visualize_df # Imports van het machine learning script.
-from main import make_dataframe, connect_database
+from main import make_dataframe, connect_database, dataframe2database
 
 
 
@@ -28,32 +28,44 @@ app.layout = html.Div([
         dcc.Tab(label='Begin hier!', children=[
     dbc.Row(
         [
-            dbc.Label("Leeftijd", width="auto"),
-            dbc.Col(
+            # Vraag 1
+            dbc.Label("Maak je gebruik van Snapchat of Tiktok?", width="auto", align="center", size="lg"),
                 dbc.Input(id="age_input", type="number", placeholder="Type hier je leeftijd (jaren)",size="lg"),
-                className="me-3",
-            ),
+                dcc.RadioItems(["Ja", "Nee"], inline=True, id="vraag1"),
+            # Vraag 2
+            dbc.Label("Heb je ooit een Sony Walkman / discman gekocht?", width="auto", size="lg"),
+                #dbc.Input(id="weight_input", type="number", placeholder="Type hier je gewicht (kg)",size="lg"),
+                dcc.RadioItems(["Ja", "Nee"], inline=True, id="vraag2"),
+            # Vraag 3
+            dbc.Label("Lees je regelmatig de krant?", width="auto", size="lg"),
+              #  dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
+                dcc.RadioItems(["Ja", "Nee"], inline=True, id="vraag3"),
+            # Vraag 4
+            dbc.Label("Wat lijkt het meest op je eerste mobiele telefoon?", width="auto", size="lg"),
+                #dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
+                dcc.RadioItems(["A","B","C","D","E","F","G","H","I","J","K","L"], inline=True, id="vraag4"),
+               # html.Img(src="/home/floris/Documenten/git_repo/Hanze_ML_Demo/assets/telefoon.jpg"),
+            # Vraag 5
+            dbc.Label("Geef je de voorkeur aan bellen of emailen / Whatsapp etc.?", width="auto", size="lg"),
+                #dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
+                dcc.RadioItems(["Ja", "Nee"], inline=True, id="vraag5"),
+            # Vraag 6
+            dbc.Label("Gebruik je bij het sturen van digitale berichten geregeld smileys zoals '😂'?", width="auto", size="lg"),
+               # dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
+                dcc.RadioItems(["Ja", "Nee"], inline=True, id="vraag6"),
 
-            dbc.Label("Gewicht", width="auto"),
-            dbc.Col(
-                dbc.Input(id="weight_input", type="number", placeholder="Type hier je gewicht (kg)",size="lg"),
-                className="me-3",
-            ),
-        
-            dbc.Label("Lengte", width="auto"),
-            dbc.Col(
-                dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
-                className="me-3",
-            ),
-            
             dbc.Button([dbc.Spinner(size="sm", show_initially="False"), "Voorspel leeftijd!"],n_clicks=0, id="submit_button",color="primary", size="lg"),
-
             # Verborgen variablen om de input waarden in op te slaan:
             dcc.Store(id="var_store"),
             dcc.Store(id="var_store_for_database"),
+                   
+                   # Test:
+                html.Div(
+                    [html.Button("Bepaal je leeftijd", className="button")],  
+                )
         ],
 
-        className="g-2",
+        className="g-2", justify="center",
     )
         ]),
 
@@ -88,16 +100,19 @@ app.layout = html.Div([
 
 @app.callback(
     Output("submit_button", "disabled"),
-    Input("age_input","value"),
-    Input("weight_input", "value"),
-    Input("height_input","value"),
+    Input("vraag1","value"),
+    Input("vraag2","value"),
+    Input("vraag3","value"),
+    Input("vraag4","value"),
+    Input("vraag5","value"),
+    Input("vraag6","value"),
 )
 
-def submit_button_activate(leeftijd,gewicht,lengte):
+def submit_button_activate(vraag1,vraag2,vraag3,vraag4,vraag5,vraag6):
     """
     Bepaal of de submit knop gebruikt kan worden, alleen wanneer alle waarden in gevuld zijn.
     """
-    if leeftijd is None or gewicht is None or lengte is None:
+    if None in [vraag1,vraag2,vraag3,vraag4,vraag5,vraag6]:
         return True
     else:
         return False
@@ -108,20 +123,20 @@ def submit_button_activate(leeftijd,gewicht,lengte):
     Output("var_store","data"),
     Input("submit_button","n_clicks"),
     State("age_input","value"),
-    State("weight_input","value"),
-    State("height_input","value"),
+    State("vraag1","value"),
+    State("vraag2","value"),
     prevent_initial_call = True
 )
 
-def test_func(n_clicks,age_input,weight_input,height_input):
+def test_func(n_clicks,vraag1,vraag2,vraag3):
 
     db = connect_database()
     df = make_dataframe(db)
 
-    new_row = {"leeftijd": age_input,"gewicht": weight_input, "lengte": height_input}
-    df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+    # new_row = {"leeftijd": age_input,"gewicht": weight_input, "lengte": height_input}
+    # df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
 
-   # df = df.loc[len(df)] = [age_input,weight_input,height_input]
+    # dataframe2database(df) # Sla de niewe waarden ook op in de database.
 
     print(df)
 
@@ -129,12 +144,12 @@ def test_func(n_clicks,age_input,weight_input,height_input):
 @app.callback(
     Output("test_graph","figure"),
     Input("submit_button","n_clicks"),
-    State("age_input","value"),
-    State("weight_input","value"),
+    State("vraag1","value"),
+    State("vraag2","value"),
     prevent_initial_call = True
 )
 
-def test_graph(n_clicks,age_input, weight_input):
+def test_graph(n_clicks,vraag1, vraag2):
 
     test_df = pd.DataFrame({"age_input": [1,2,3],"weight_input": [3,4,5]}) # Test...
 
