@@ -33,14 +33,19 @@ def make_dataframe(db):
     return df
 
 
-def dataframe2database(df):
+def commit2database(vraag1,vraag2,vraag3,vraag4,vraag5,vraag6):
     """
-    Om de nieuwe waarden van het dataframe in de database op te nemen.
+    Om de nieuwe waarden van het dashboard in de database op te nemen.
     """
     db = sqlite3.connect(database="DB/database.db")
+    cursor = db.cursor()
 
-    df.to_sql('schedule', db, if_exists='append')
+    #df.to_sql("vragenlijst_data", db, if_exists="append", index=False)
+    cursor.execute("INSERT INTO vragenlijst_data(social_media,mp3_speler,krant,telefoon,bellen_of_email,smileys) VALUES (?,?,?,?,?,?)", (vraag1,vraag2,vraag3,vraag4,vraag5,vraag6))
+    cursor.execute("select * from vragenlijst_data;") # Test
+    db.commit()
     db.close()
+
 
 
 
