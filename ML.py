@@ -1,15 +1,20 @@
 """"
-Machine learning
+Machine learning script
+Gebruikt een SVR model om de leeftijd te voorspellen, deze leeftijd wordt vervolgens
+als generatie (Gen X, Z etc.) aan de gebruiker weergeven aangezien de werkelijke leeftijd niet naukeurig genoeg 
+bepaald kan worden aan de hand van 5 vragen.
 
 "This is where the magic happens..."
 
 Autheur: Floris Menninga
 Datum: 20-07-2025
+Versie: 0.1
 
 """
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 from main import connect_database
@@ -37,6 +42,7 @@ def visualize_df(df, df_valid):
     """
     Om de gegevens te visualizeren die al aanwezig zijn in de database
     """
+    # To-do: integreren in dashboard...
 
     # Paarsgewijze correlaties:
     axs = sns.heatmap(df[["social_media", "mp3_speler", "krant", "telefoon", "bellen_of_email", "smileys"]].corr(), annot=True, annot_kws={"fontsize": "x-small"}, cmap="jet", vmin=0.0, vmax=1.0, square=True)

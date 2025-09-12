@@ -13,15 +13,12 @@ import pandas as pd
 
 
 from ML import data_check, visualize_df # Imports van het machine learning script.
-from main import make_dataframe, connect_database, dataframe2database
+from main import make_dataframe, connect_database, commit2database
 
 
 
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], serve_locally=False)
 
-app.css.append_css({
-    "external_url": "assets/button.css"
-})
 
 app.layout = html.Div([
     dcc.Tabs([
@@ -30,7 +27,7 @@ app.layout = html.Div([
         [
             # Vraag 1
             dbc.Label("Maak je gebruik van Snapchat of Tiktok?", width="auto", align="center", size="lg"),
-                dbc.Input(id="age_input", type="number", placeholder="Type hier je leeftijd (jaren)",size="lg"),
+                #dbc.Input(id="age_input", type="number", placeholder="Type hier je leeftijd (jaren)",size="lg"),
                 dcc.RadioItems(["Ja", "Nee"], inline=True, id="vraag1"),
             # Vraag 2
             dbc.Label("Heb je ooit een Sony Walkman / discman gekocht?", width="auto", size="lg"),
@@ -44,7 +41,7 @@ app.layout = html.Div([
             dbc.Label("Wat lijkt het meest op je eerste mobiele telefoon?", width="auto", size="lg"),
                 #dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
                 dcc.RadioItems(["A","B","C","D","E","F","G","H","I","J","K","L"], inline=True, id="vraag4"),
-               # html.Img(src="/home/floris/Documenten/git_repo/Hanze_ML_Demo/assets/telefoon.jpg"),
+               # html.Img(src="assets/telefoon.jpg"),
             # Vraag 5
             dbc.Label("Geef je de voorkeur aan bellen of emailen / Whatsapp etc.?", width="auto", size="lg"),
                 #dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
@@ -62,7 +59,8 @@ app.layout = html.Div([
                    # Test:
                 html.Div(
                     [html.Button("Bepaal je leeftijd", className="button")],  
-                )
+                ),
+
         ],
 
         className="g-2", justify="center",
@@ -116,30 +114,38 @@ def submit_button_activate(vraag1,vraag2,vraag3,vraag4,vraag5,vraag6):
         return True
     else:
         return False
-    # To-do: extra clausules toevoegen voor rare waarden etc. 
-
+    
 
 @app.callback(
     Output("var_store","data"),
     Input("submit_button","n_clicks"),
-    State("age_input","value"),
     State("vraag1","value"),
     State("vraag2","value"),
+    State("vraag3","value"),
+    State("vraag4","value"),
+    State("vraag5","value"),
+    State("vraag6","value"),
     prevent_initial_call = True
 )
 
-def test_func(n_clicks,vraag1,vraag2,vraag3):
+def get_userdata(n_clicks,vraag1,vraag2,vraag3,vraag4,vraag5,vraag6):
 
-    db = connect_database()
-    df = make_dataframe(db)
+    #print(vraag1)
 
-    # new_row = {"leeftijd": age_input,"gewicht": weight_input, "lengte": height_input}
+    # db = connect_database()
+    # df = make_dataframe(db)
+
+    # new_row = {"leeftijd": "gewicht": weight_input, "lengte": height_input}
     # df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
 
-    # dataframe2database(df) # Sla de niewe waarden ook op in de database.
+    # Sla de niewe waarden ook op in de database.
 
-    print(df)
+    questions = [vraag1,vraag2,vraag3,vraag4,vraag5,vraag6]
 
+    questions = [1 if v=="Ja" else 0 if v=="Nee" else v for v in questions]
+
+    commit2database(questions[0],questions[1],questions[2],questions[3],questions[4],questions[5]) 
+    
 
 @app.callback(
     Output("test_graph","figure"),
