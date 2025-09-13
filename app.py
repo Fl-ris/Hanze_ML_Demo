@@ -12,12 +12,15 @@ import plotly.express as px
 import pandas as pd
 
 
-from ML import data_check, visualize_df # Imports van het machine learning script.
+from ML import data_check, visualize_df, load_model# Imports van het machine learning script.
 from main import make_dataframe, connect_database, commit2database
 
 
+model = load_model()
+features = ["mp3_speler", "krant", "bellen_of_email", "smileys"]
 
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], serve_locally=False)
+
 
 
 app.layout = html.Div([
@@ -38,10 +41,10 @@ app.layout = html.Div([
               #  dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
                 dcc.RadioItems(["Ja", "Nee"], inline=True, id="vraag3"),
             # Vraag 4
-            dbc.Label("Wat lijkt het meest op je eerste mobiele telefoon?", width="auto", size="lg"),
-                #dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
-                dcc.RadioItems(["A","B","C","D","E","F","G","H","I","J","K","L"], inline=True, id="vraag4"),
-               # html.Img(src="assets/telefoon.jpg"),
+            # dbc.Label("Wat lijkt het meest op je eerste mobiele telefoon?", width="auto", size="lg"),
+            #     #dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
+            #     dcc.RadioItems(["A","B","C","D","E","F","G","H","I","J","K","L"], inline=True, id="vraag4"),
+            #    # html.Img(src="assets/telefoon.jpg"),
             # Vraag 5
             dbc.Label("Geef je de voorkeur aan bellen of emailen / Whatsapp etc.?", width="auto", size="lg"),
                 #dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
@@ -55,7 +58,9 @@ app.layout = html.Div([
             # Verborgen variablen om de input waarden in op te slaan:
             dcc.Store(id="var_store"),
             dcc.Store(id="var_store_for_database"),
-                   
+
+            html.Div(id="age_prediction"),
+
                    # Test:
                 html.Div(
                     [html.Button("Bepaal je leeftijd", className="button")],  
@@ -101,16 +106,16 @@ app.layout = html.Div([
     Input("vraag1","value"),
     Input("vraag2","value"),
     Input("vraag3","value"),
-    Input("vraag4","value"),
+  #  Input("vraag4","value"),
     Input("vraag5","value"),
     Input("vraag6","value"),
 )
 
-def submit_button_activate(vraag1,vraag2,vraag3,vraag4,vraag5,vraag6):
+def submit_button_activate(vraag1,vraag2,vraag3,vraag5,vraag6):
     """
     Bepaal of de submit knop gebruikt kan worden, alleen wanneer alle waarden in gevuld zijn.
     """
-    if None in [vraag1,vraag2,vraag3,vraag4,vraag5,vraag6]:
+    if None in [vraag1,vraag2,vraag3,vraag5,vraag6]:
         return True
     else:
         return False
@@ -122,13 +127,13 @@ def submit_button_activate(vraag1,vraag2,vraag3,vraag4,vraag5,vraag6):
     State("vraag1","value"),
     State("vraag2","value"),
     State("vraag3","value"),
-    State("vraag4","value"),
+#    State("vraag4","value"),
     State("vraag5","value"),
     State("vraag6","value"),
     prevent_initial_call = True
 )
 
-def get_userdata(n_clicks,vraag1,vraag2,vraag3,vraag4,vraag5,vraag6):
+def get_userdata(n_clicks,vraag1,vraag2,vraag3,vraag5,vraag6):
 
     #print(vraag1)
 
@@ -140,11 +145,11 @@ def get_userdata(n_clicks,vraag1,vraag2,vraag3,vraag4,vraag5,vraag6):
 
     # Sla de niewe waarden ook op in de database.
 
-    questions = [vraag1,vraag2,vraag3,vraag4,vraag5,vraag6]
+    questions = [vraag1,vraag2,vraag3,vraag5,vraag6]
 
     questions = [1 if v=="Ja" else 0 if v=="Nee" else v for v in questions]
 
-    commit2database(questions[0],questions[1],questions[2],questions[3],questions[4],questions[5]) 
+    commit2database(questions[0],questions[1],questions[2],questions[3],questions[4]) 
     
 
 @app.callback(

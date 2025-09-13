@@ -19,7 +19,11 @@ import seaborn as sns
 
 from main import connect_database
 from main import make_dataframe
+import joblib
+from pathlib import Path
 
+
+TRAINED_MODEL = Path("assets/model.joblib")
 
 
 def data_check(df):
@@ -45,7 +49,7 @@ def visualize_df(df, df_valid):
     # To-do: integreren in dashboard...
 
     # Paarsgewijze correlaties:
-    axs = sns.heatmap(df[["social_media", "mp3_speler", "krant", "telefoon", "bellen_of_email", "smileys"]].corr(), annot=True, annot_kws={"fontsize": "x-small"}, cmap="jet", vmin=0.0, vmax=1.0, square=True)
+    axs = sns.heatmap(df[["social_media", "mp3_speler", "krant", "bellen_of_email", "smileys"]].corr(), annot=True, annot_kws={"fontsize": "x-small"}, cmap="jet", vmin=0.0, vmax=1.0, square=True)
     axs.set_title("Paarsgewijze correlaties")
         
     # Histogram    
@@ -57,12 +61,17 @@ def visualize_df(df, df_valid):
 
 def train(df):
 
-    features_ordinal = df["telefoon"]
+    db = connect_database()
+    df = make_dataframe(db)
+
+
+   # features_ordinal = df["telefoon"]
     features_categorical = df[["mp3_speler", "krant", "bellen_of_email", "smileys"]]
 
     to_predict = df["voorspelde_generatie"]
 
-    X = pd.concat([features_categorical,features_ordinal] , axis=1)
+   # X = pd.concat([features_categorical,features_ordinal] , axis=1)
+    X = features_categorical
 
     print(df[["mp3_speler", "krant", "bellen_of_email", "smileys"]].shape)
     print(df["werkelijke_leeftijd"].shape)
@@ -73,24 +82,24 @@ def train(df):
 
     pipeline = Pipeline([
         ("scaler", StandardScaler()),
-        # ("ordinal", OrdinalEncoder(
-        # categories=[[0,1],[0,1],[0,1],[0,1],[1,2,3,4,5,6,7,8,9,10,11,12]],
-        # handle_unknown='use_encoded_value', 
-        # unknown_value=-1)),
         ("SVR", SVR(kernel="linear"))
     ])
 
     pipeline.fit(X_train, y_train)
 
-    y_train_pred = pipeline.predict(X_train)
+    joblib.dump(pipeline, TRAINED_MODEL)
 
-    y_test_pred  = pipeline.predict(X_test)
 
+def load_model():
+    if not TRAINED_MODEL.is_file():
+        print("Nog geen bestaand model gevonden. Er wordt nu een nieuwe getrained....")
+        train()
+    return joblib.load(TRAINED_MODEL)
 
 
 def predict():
-    pass
-
+    prediction = pipeline.predict(placeholder)
+    return prediction
 
 
 def main():
