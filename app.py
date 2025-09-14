@@ -1,7 +1,7 @@
 """
 Dash dashboard
 Datum: 29-08-2025
-Autheur: Floris Menninga
+Auteur: Floris Menninga
 Versie: 0.1
 """
 
@@ -72,7 +72,7 @@ app.layout = html.Div([
 
         # Tabblad om een grafiek met voorgaande voorspellingen te zien.
         dcc.Tab(label='Voorgaande voorspellingen', children=[
-        dcc.Graph(id="test_graph"),
+        dcc.Graph(id="age_graph"),
         html.Div(id="age_prediction"),
         ]),
 
@@ -179,6 +179,33 @@ def save_to_database(n_clicks):
 
 
 @app.callback(
+    Output("age_graph","figure"),
+    Input("submit_button","n_clicks"),
+    prevent_initial_call = True
+)
+
+def age_graph(n_clicks):
+
+    db = connect_database()
+    df = make_dataframe(db)
+
+    index = df["id"]
+    real_ages = pd.to_numeric(df["werkelijke_leeftijd"],errors="coerce").dropna()
+
+    # Grafiek van gebruikers' leeftijd
+    fig = px.histogram(
+        real_ages,
+        x="werkelijke_leeftijd",
+        nbins=30,
+        title="Leeftijd van deelnemers",
+        labels={"Leeftijd": "Jaar"}
+    )
+
+    return fig
+
+
+
+@app.callback(
     Output("age_prediction", "children"),
     Input("submit_button", "n_clicks"),
     State("vraag1", "value"),
@@ -196,6 +223,8 @@ def prediction(n_clicks,vraag1,vraag2,vraag3,vraag5,vraag6):
     model = load_model()
     features = ["mp3_speler", "krant", "bellen_of_email", "smileys"]
     y_pred = model.y_pred
+    y_prob_interval = model.y_prob_interval # 95% waarschijnlijkheid interval
+    
     
     predicted_age = model.predict(np.array(binary_answers).reshape(1, -1))[0]
     print(y_pred)
