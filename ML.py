@@ -4,8 +4,6 @@ Gebruikt een SVR model om de leeftijd te voorspellen, deze leeftijd wordt vervol
 als generatie (Gen X, Z etc.) aan de gebruiker weergeven aangezien de werkelijke leeftijd niet naukeurig genoeg 
 bepaald kan worden aan de hand van 5 vragen.
 
-"This is where the magic happens..."
-
 Autheur: Floris Menninga
 Datum: 20-07-2025
 Versie: 0.1
@@ -15,7 +13,12 @@ Versie: 0.1
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.svm import SVR
+from sklearn.preprocessing import StandardScaler
+from mapie.regression import MapieRegressor
 
 from main import connect_database
 from main import make_dataframe
@@ -57,24 +60,24 @@ def visualize_df(df, df_valid):
 
 
 
-
-
 def train(df):
 
-    db = connect_database()
-    df = make_dataframe(db)
+    if df is None:
+        db = connect_database()
+        df = make_dataframe(db)
 
+    mask = df["werkelijke_leeftijd"].notna()
+    n_dropped = (~mask).sum()
+    if n_dropped:
+        df = df.loc[mask]    
 
    # features_ordinal = df["telefoon"]
-    features_categorical = df[["mp3_speler", "krant", "bellen_of_email", "smileys"]]
+    features_categorical = df[["social_media","mp3_speler","krant","bellen_of_email","smileys"]]
 
     to_predict = df["voorspelde_generatie"]
 
    # X = pd.concat([features_categorical,features_ordinal] , axis=1)
     X = features_categorical
-
-    print(df[["mp3_speler", "krant", "bellen_of_email", "smileys"]].shape)
-    print(df["werkelijke_leeftijd"].shape)
 
     y = df["werkelijke_leeftijd"]
 
@@ -84,22 +87,28 @@ def train(df):
         ("scaler", StandardScaler()),
         ("SVR", SVR(kernel="linear"))
     ])
+    mapie = MapieRegressor(estimator=pipeline, cv="split", n_jobs=-1)
 
+    mapie.fit(X_train, y_train)
+    y_pred, y_prob_interval = mapie.predict(X_test, alpha=0.05)
     pipeline.fit(X_train, y_train)
 
-    joblib.dump(pipeline, TRAINED_MODEL)
+    joblib.dump(pipeline,y_pred,y_prob_interval, TRAINED_MODEL)
 
 
 def load_model():
+    db = connect_database()
+    df = make_dataframe(db)
     if not TRAINED_MODEL.is_file():
         print("Nog geen bestaand model gevonden. Er wordt nu een nieuwe getrained....")
-        train()
+        train(df)
     return joblib.load(TRAINED_MODEL)
 
 
-def predict():
-    prediction = pipeline.predict(placeholder)
-    return prediction
+def predict(features,df):
+    model = load_model()
+    X = np.array(features, dtype=float).reshape(1, -1)
+    return model.predict(X)[0] 
 
 
 def main():

@@ -10,14 +10,12 @@ from dash import Dash, html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
+import numpy as np
 
 
-from ML import data_check, visualize_df, load_model# Imports van het machine learning script.
+from ML import data_check, visualize_df, load_model, predict# Imports van het machine learning script.
 from main import make_dataframe, connect_database, commit2database
 
-
-model = load_model()
-features = ["mp3_speler", "krant", "bellen_of_email", "smileys"]
 
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], serve_locally=False)
 
@@ -48,22 +46,22 @@ app.layout = html.Div([
             # Vraag 5
             dbc.Label("Geef je de voorkeur aan bellen of emailen / Whatsapp etc.?", width="auto", size="lg"),
                 #dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
-                dcc.RadioItems(["Ja", "Nee"], inline=True, id="vraag5"),
+                dcc.RadioItems(["Bellen", "Whatsapp etc."], inline=True, id="vraag5"),
             # Vraag 6
             dbc.Label("Gebruik je bij het sturen van digitale berichten geregeld smileys zoals '😂'?", width="auto", size="lg"),
                # dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
                 dcc.RadioItems(["Ja", "Nee"], inline=True, id="vraag6"),
 
-            dbc.Button([dbc.Spinner(size="sm", show_initially="False"), "Voorspel leeftijd!"],n_clicks=0, id="submit_button",color="primary", size="lg"),
+           # dbc.Button([dbc.Spinner(size="sm", show_initially="False"), "Voorspel leeftijd!"],n_clicks=0, id="submit_button",color="primary", size="lg"),
             # Verborgen variablen om de input waarden in op te slaan:
             dcc.Store(id="var_store"),
             dcc.Store(id="var_store_for_database"),
 
-            html.Div(id="age_prediction"),
+            
 
                    # Test:
                 html.Div(
-                    [html.Button("Bepaal je leeftijd", className="button")],  
+                    [html.Button("Bepaal je leeftijd", className="button", id="submit_button")],  
                 ),
 
         ],
@@ -75,24 +73,23 @@ app.layout = html.Div([
         # Tabblad om een grafiek met voorgaande voorspellingen te zien.
         dcc.Tab(label='Voorgaande voorspellingen', children=[
         dcc.Graph(id="test_graph"),
-            dcc.Graph(
-                figure={
-                    'data': [
-                        {'x': [1, 2, 3], 'y': [2, 4, 3],
-                            'type': 'bar', 'name': 'SF'},
-                        {'x': [1, 2, 3], 'y': [5, 4, 3],
-                         'type': 'bar', 'name': 'Montréal'},
-                    ]
-                }
-            )
+        html.Div(id="age_prediction"),
         ]),
 
         
         # Tab met informatie over het ML model dat gebruikt wordt om de voorspellingen te maken.
         dcc.Tab(label='Hoe werkt dit?', children=[
         dcc.Markdown("""
-                    ## Placeholder ##
-                     **informatie hier...**
+                    ## SVR model ##
+                    Op de achtergrond wordt een SVR model gebruikt om je leeftijd te voorspellen. 
+                     SVR, "Support Vector Regression".
+                    
+                    ### Betrouwbaarheid ###
+                    De resultaten van een model dat getrained is met data van vijf vragen 
+                    kunnen onbetrouwbaar zijn, dit zou op te lossen zijn door meer vragen toe te voegen.
+                     
+
+                    
 
                     """)
                      
@@ -181,7 +178,28 @@ def save_to_database(n_clicks):
     print(df)
 
 
+@app.callback(
+    Output("age_prediction", "children"),
+    Input("submit_button", "n_clicks"),
+    State("vraag1", "value"),
+    State("vraag2", "value"),
+    State("vraag3", "value"),
+    State("vraag5", "value"),
+    State("vraag6", "value"),
+    prevent_initial_call=True,
 
+)
+def prediction(n_clicks,vraag1,vraag2,vraag3,vraag5,vraag6):
+    binary_answers = [vraag1, vraag2, vraag3, vraag5, vraag6]
+    binary_answers = [1 if ans == "Ja" else 0 for ans in binary_answers]
+
+    model = load_model()
+    features = ["mp3_speler", "krant", "bellen_of_email", "smileys"]
+    y_pred = model.y_pred
+    
+    predicted_age = model.predict(np.array(binary_answers).reshape(1, -1))[0]
+    print(y_pred)
+    return f"Voorspelde leeftijd: {int(round(predicted_age))} jaar." # Test
 
 if __name__ == "__main__":
     app.run(debug=True)
