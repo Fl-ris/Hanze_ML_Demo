@@ -87,11 +87,14 @@ app.layout = html.Div([
                     ### Betrouwbaarheid ###
                     De resultaten van een model dat getrained is met data van vijf vragen 
                     kunnen onbetrouwbaar zijn, dit zou op te lossen zijn door meer vragen toe te voegen.
-                     
+                    
+                    ## Correlaties tussen leeftijd en de vragen ##
+                    De paarsgewijze correlaties zijn weergeven op de onderstaande heatmap. 
 
                     
 
-                    """)
+                    """),
+                    dcc.Graph(id="feature_correlation_graph"),
                      
         ]),
     ])
@@ -181,7 +184,7 @@ def save_to_database(n_clicks):
 @app.callback(
     Output("age_graph","figure"),
     Input("submit_button","n_clicks"),
-    prevent_initial_call = True
+    #prevent_initial_call = True
 )
 
 def age_graph(n_clicks):
@@ -189,7 +192,6 @@ def age_graph(n_clicks):
     db = connect_database()
     df = make_dataframe(db)
 
-    index = df["id"]
     real_ages = pd.to_numeric(df["werkelijke_leeftijd"],errors="coerce").dropna()
 
     # Grafiek van gebruikers' leeftijd
@@ -203,6 +205,31 @@ def age_graph(n_clicks):
 
     return fig
 
+@app.callback(
+    Output("feature_correlation_graph","figure"),
+    Input("submit_button","n_clicks"),
+    #prevent_initial_call = True
+)
+
+def feature_correlation_graph(n_clicks):
+    import seaborn as sns
+    db = connect_database()
+    df = make_dataframe(db)
+
+    #real_ages = pd.to_numeric(df["werkelijke_leeftijd"],errors="coerce").dropna()
+
+    cols = ["social_media", "mp3_speler", "krant", "bellen_of_email", "smileys"]
+    corr = df[cols].corr()
+
+
+    fig = px.imshow(
+        corr,
+        text_auto=True,
+        aspect="auto",
+        labels=dict(x="", y="", color="Correlation")
+    )
+
+    return fig
 
 
 @app.callback(
@@ -217,18 +244,22 @@ def age_graph(n_clicks):
 
 )
 def prediction(n_clicks,vraag1,vraag2,vraag3,vraag5,vraag6):
+
     binary_answers = [vraag1, vraag2, vraag3, vraag5, vraag6]
     binary_answers = [1 if ans == "Ja" else 0 for ans in binary_answers]
 
     model = load_model()
-    features = ["mp3_speler", "krant", "bellen_of_email", "smileys"]
-    y_pred = model.y_pred
-    y_prob_interval = model.y_prob_interval # 95% waarschijnlijkheid interval
+    print(model.keys())
+    print(model)
+
+    y_pred = model.get(y_pred)
+    y_prob_interval = model.get(y_prob_interval) # 95% waarschijnlijkheids interval
     
     
     predicted_age = model.predict(np.array(binary_answers).reshape(1, -1))[0]
-    print(y_pred)
+    # print(y_pred)
     return f"Voorspelde leeftijd: {int(round(predicted_age))} jaar." # Test
+
 
 if __name__ == "__main__":
     app.run(debug=True)

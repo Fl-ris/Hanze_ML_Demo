@@ -4,7 +4,7 @@ Gebruikt een SVR model om de leeftijd te voorspellen, deze leeftijd wordt vervol
 als generatie (Gen X, Z etc.) aan de gebruiker weergeven aangezien de werkelijke leeftijd niet naukeurig genoeg 
 bepaald kan worden aan de hand van 5 vragen.
 
-Autheur: Floris Menninga
+Auteur: Floris Menninga
 Datum: 20-07-2025
 Versie: 0.1
 
@@ -93,7 +93,13 @@ def train(df):
     y_pred, y_prob_interval = mapie.predict(X_test, alpha=0.05)
     pipeline.fit(X_train, y_train)
 
-    joblib.dump(pipeline,y_pred,y_prob_interval, TRAINED_MODEL)
+    joblib_dict = {
+        "pipeline": pipeline,
+        "y_pred": y_pred,
+        "y_prob_interval": y_prob_interval,
+    }
+
+    joblib.dump(joblib_dict, TRAINED_MODEL)
 
 
 def load_model():
