@@ -29,30 +29,25 @@ app.layout = html.Div([
             # Vraag 1
             dbc.Label("Maak je gebruik van Snapchat of Tiktok?", width="auto", align="center", size="lg"),
                 #dbc.Input(id="age_input", type="number", placeholder="Type hier je leeftijd (jaren)",size="lg"),
-                dcc.RadioItems(["Ja", "Nee"], inline=True, id="vraag1"),
+                dcc.RadioItems(["Ja", "Nee"], inline=True, className="d-flex justify-content-center", id="vraag1"),
             # Vraag 2
             dbc.Label("Heb je ooit een Sony Walkman / discman gekocht?", width="auto", size="lg"),
                 #dbc.Input(id="weight_input", type="number", placeholder="Type hier je gewicht (kg)",size="lg"),
-                dcc.RadioItems(["Ja", "Nee"], inline=True, id="vraag2"),
+                dcc.RadioItems(["Ja", "Nee"], inline=True, className="d-flex justify-content-center", id="vraag2"),
             # Vraag 3
             dbc.Label("Lees je regelmatig de krant?", width="auto", size="lg"),
               #  dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
-                dcc.RadioItems(["Ja", "Nee"], inline=True, id="vraag3"),
-            # Vraag 4
-            # dbc.Label("Wat lijkt het meest op je eerste mobiele telefoon?", width="auto", size="lg"),
-            #     #dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
-            #     dcc.RadioItems(["A","B","C","D","E","F","G","H","I","J","K","L"], inline=True, id="vraag4"),
-            #    # html.Img(src="assets/telefoon.jpg"),
+                dcc.RadioItems(["Ja", "Nee"], inline=True, className="d-flex justify-content-center", id="vraag3"),
             # Vraag 5
             dbc.Label("Geef je de voorkeur aan bellen of emailen / Whatsapp etc.?", width="auto", size="lg"),
                 #dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
                 dcc.RadioItems(options=[
             {"label": "Bellen", "value": 0},
-            {"label": "Whatsapp etc.", "value": 1},], inline=True, id="vraag5"),
+            {"label": "Whatsapp etc.", "value": 1},], inline=True, className="d-flex justify-content-center", id="vraag5"),
             # Vraag 6
             dbc.Label("Gebruik je bij het sturen van digitale berichten geregeld smileys zoals '😂'?", width="auto", size="lg"),
                # dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
-                dcc.RadioItems(["Ja", "Nee"], inline=True, id="vraag6"),
+                dcc.RadioItems(["Ja", "Nee"], inline=True, className="d-flex justify-content-center", id="vraag6"),
 
            # dbc.Button([dbc.Spinner(size="sm", show_initially="False"), "Voorspel leeftijd!"],n_clicks=0, id="submit_button",color="primary", size="lg"),
             # Verborgen variablen om de input waarden in op te slaan:
@@ -60,13 +55,11 @@ app.layout = html.Div([
             dcc.Store(id="var_store_for_database"),
 
             
-
-                   # Test:
+            dbc.Col(
                 html.Div(
-                    [html.Button("Bepaal je leeftijd", className="button", id="submit_button")],  
-                    
-                ),
-                html.Div(id="age_prediction"),
+                    [html.Button("Voorspel je leeftijd", className="button", id="submit_button")],  
+                    className="justify-content-center",
+                ),)
 
         ],
 
@@ -75,9 +68,10 @@ app.layout = html.Div([
         ]),
 
         # Tabblad om een grafiek met voorgaande voorspellingen te zien.
-        dcc.Tab(label='Voorgaande voorspellingen', children=[
+        dcc.Tab(label='Voorgaande voorspellingen',value="tab-2", children=[
         dcc.Graph(id="age_graph"),
         html.Div(id="age_prediction"),
+        
         ]),
 
         
@@ -171,6 +165,13 @@ def test_graph(n_clicks,vraag1, vraag2):
     fig = px.scatter(test_df, x="age_input", y="weight_input")
     return fig
 
+@app.callback(
+    Output("tabs", "value"),
+    Input("submit_button", "n_clicks"),
+    prevent_initial_call=True,
+)
+def go_to_prediction_tab(n_clicks):
+    return "tab-2"
 
 
 @app.callback(
