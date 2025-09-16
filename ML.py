@@ -1,7 +1,7 @@
 """"
 Machine learning script
 Gebruikt een SVR model om de leeftijd te voorspellen, deze leeftijd wordt vervolgens
-als generatie (Gen X, Z etc.) aan de gebruiker weergeven aangezien de werkelijke leeftijd niet naukeurig genoeg 
+als generatie (Gen X, Z etc.) aan de gebruiker weergeven aangezien de werkelijke leeftijd niet nauwkeurig genoeg 
 bepaald kan worden aan de hand van 5 vragen.
 
 Auteur: Floris Menninga
@@ -93,10 +93,14 @@ def train(df):
     y_pred, y_prob_interval = mapie.predict(X_test, alpha=0.05)
     pipeline.fit(X_train, y_train)
 
+    lower, upper = mapie.predict(X, alpha=0.05)[1][0]
+    
     joblib_dict = {
         "pipeline": pipeline,
         "y_pred": y_pred,
         "y_prob_interval": y_prob_interval,
+        "lower": lower,
+        "upper": upper,
     }
 
     joblib.dump(joblib_dict, TRAINED_MODEL)

@@ -46,7 +46,9 @@ app.layout = html.Div([
             # Vraag 5
             dbc.Label("Geef je de voorkeur aan bellen of emailen / Whatsapp etc.?", width="auto", size="lg"),
                 #dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
-                dcc.RadioItems(["Bellen", "Whatsapp etc."], inline=True, id="vraag5"),
+                dcc.RadioItems(options=[
+            {"label": "Bellen", "value": 0},
+            {"label": "Whatsapp etc.", "value": 1},], inline=True, id="vraag5"),
             # Vraag 6
             dbc.Label("Gebruik je bij het sturen van digitale berichten geregeld smileys zoals '😂'?", width="auto", size="lg"),
                # dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
@@ -62,7 +64,9 @@ app.layout = html.Div([
                    # Test:
                 html.Div(
                     [html.Button("Bepaal je leeftijd", className="button", id="submit_button")],  
+                    
                 ),
+                html.Div(id="age_prediction"),
 
         ],
 
@@ -212,7 +216,6 @@ def age_graph(n_clicks):
 )
 
 def feature_correlation_graph(n_clicks):
-    import seaborn as sns
     db = connect_database()
     df = make_dataframe(db)
 
@@ -248,17 +251,15 @@ def prediction(n_clicks,vraag1,vraag2,vraag3,vraag5,vraag6):
     binary_answers = [vraag1, vraag2, vraag3, vraag5, vraag6]
     binary_answers = [1 if ans == "Ja" else 0 for ans in binary_answers]
 
-    model = load_model()
-    print(model.keys())
-    print(model)
+    joblib_dict = load_model()
+    pipeline = joblib_dict["pipeline"]
 
-    y_pred = model.get(y_pred)
-    y_prob_interval = model.get(y_prob_interval) # 95% waarschijnlijkheids interval
-    
-    
-    predicted_age = model.predict(np.array(binary_answers).reshape(1, -1))[0]
-    # print(y_pred)
-    return f"Voorspelde leeftijd: {int(round(predicted_age))} jaar." # Test
+   # y_pred = model.get(y_pred)
+    #y_prob_interval = model.get(y_prob_interval) # 95% waarschijnlijkheids interval
+
+    predicted_age = pipeline.predict(np.array(binary_answers).reshape(1, -1))[0]
+
+    return f"Voorspelde leeftijd: {int(round(predicted_age))} {joblib_dict["lower"]} {joblib_dict["upper"]} jaar." # Test
 
 
 if __name__ == "__main__":

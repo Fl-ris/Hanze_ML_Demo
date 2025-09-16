@@ -57,7 +57,7 @@ def main():
     
     df = make_dataframe(db)
 
-    db = dataframe2database(df)
+    #db = dataframe2database(df)
 
 
 if __name__ == "__main__":
