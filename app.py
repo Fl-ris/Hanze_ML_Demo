@@ -17,7 +17,7 @@ from ML import data_check, visualize_df, load_model, predict# Imports van het ma
 from main import make_dataframe, connect_database, commit2database
 
 
-app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], serve_locally=False)
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 
 
@@ -150,28 +150,13 @@ def get_userdata(n_clicks,vraag1,vraag2,vraag3,vraag5,vraag6):
     commit2database(questions[0],questions[1],questions[2],questions[3],questions[4]) 
     
 
-@app.callback(
-    Output("test_graph","figure"),
-    Input("submit_button","n_clicks"),
-    State("vraag1","value"),
-    State("vraag2","value"),
-    prevent_initial_call = True
-)
-
-def test_graph(n_clicks,vraag1, vraag2):
-
-    test_df = pd.DataFrame({"age_input": [1,2,3],"weight_input": [3,4,5]}) # Test...
-
-    fig = px.scatter(test_df, x="age_input", y="weight_input")
-    return fig
-
-@app.callback(
-    Output("tabs", "value"),
-    Input("submit_button", "n_clicks"),
-    prevent_initial_call=True,
-)
-def go_to_prediction_tab(n_clicks):
-    return "tab-2"
+# @app.callback(
+#     Output("tab-2", "value"),
+#     Input("submit_button", "n_clicks"),
+#     prevent_initial_call=True,
+# )
+# def go_to_prediction_tab(n_clicks):
+#     return "tab-2"
 
 
 @app.callback(
@@ -180,10 +165,10 @@ def go_to_prediction_tab(n_clicks):
     prevent_initial_call = True
 )
 
-def save_to_database(n_clicks):
-    db = connect_database()
-    df = make_dataframe(db)
-    print(df)
+# def save_to_database(n_clicks):
+#     db = connect_database()
+#     df = make_dataframe(db)
+#     print(df)
 
 
 @app.callback(
@@ -234,6 +219,31 @@ def feature_correlation_graph(n_clicks):
     )
 
     return fig
+
+
+# @app.callback(
+#     Output("scatter_graph","figure"),
+#     Input("submit_button","n_clicks"),
+# )
+
+# def scatter_graph(n_clicks):
+#     db = connect_database()
+#     df = make_dataframe(db)
+
+#     #real_ages = pd.to_numeric(df["werkelijke_leeftijd"],errors="coerce").dropna()
+
+#     cols = ["social_media", "mp3_speler", "krant", "bellen_of_email", "smileys"]
+#     corr = df[cols].corr()
+
+
+#     fig = px.imshow(
+#         corr,
+#         text_auto=True,
+#         aspect="auto",
+#         labels=dict(x="", y="", color="Correlation")
+#     )
+
+#     return fig
 
 
 @app.callback(

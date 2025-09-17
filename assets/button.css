@@ -1,3 +1,4 @@
+/* CSS code voor knop effect afkomstig van deze website: https://dev.to/webdeasy/top-20-css-buttons-animations-f41 */
 html, body {
   height: 100%;
 }
@@ -90,4 +91,28 @@ content: '';
     height: 300px;
     opacity: 0;
   }
+}
+
+.button:disabled,
+.button:disabled:hover,
+.button:disabled:focus,
+.button:disabled::before,
+.button:disabled::after {
+    opacity: 0;
+    animation: none;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.button:not(:disabled)::after {
+    content: '';
+    width: 30px; height: 30px;
+    border-radius: 100%;
+    border: 6px solid #00FFCB;
+    position: absolute;
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: ring 1.5s infinite;
 }

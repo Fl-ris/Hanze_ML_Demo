@@ -1,6 +1,6 @@
 ----------------------------------------------
 -- Sqlite3 database voor de enquete vragen  --
--- Autheur: Floris Menninga                 --
+-- Auteur: Floris Menninga                 --
 -- Datum: 01-08-2025                        --
 -- Versie: 0.1                              --
 ----------------------------------------------
@@ -17,18 +17,3 @@ smileys boolean, -- Vraag 6: Gebruik je bij het sturen van digitale berichten ge
 werkelijke_leeftijd int, -- Klopt de voorspelling (bevestigd door het persoon zelf).
 voorspelde_generatie int -- Hier zal de voorspeling voor dit persoon opgeslagen worden.
 );
-
--- Test data: --
-INSERT INTO vragenlijst_data
-    (social_media,
-     mp3_speler,
-     krant,
---     telefoon,
-     bellen_of_email,
-     smileys,
-     werkelijke_leeftijd,
-     voorspelde_generatie)
-VALUES
-(1, 0, 0, 1, 1, NULL, NULL),
-(1, 0, 0, 1, 1, NULL, NULL);
-
