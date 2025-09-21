@@ -22,76 +22,153 @@ app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 
 app.layout = html.Div([
-    dcc.Tabs([
-        dcc.Tab(label='Begin hier!', children=[
-    dbc.Row(
-        [
-            # Vraag 1
-            dbc.Label("Maak je gebruik van Snapchat of Tiktok?", width="auto", align="center", size="lg"),
-                #dbc.Input(id="age_input", type="number", placeholder="Type hier je leeftijd (jaren)",size="lg"),
-                dcc.RadioItems(["Ja", "Nee"], inline=True, className="d-flex justify-content-center", id="vraag1"),
-            # Vraag 2
-            dbc.Label("Heb je ooit een Sony Walkman / discman gekocht?", width="auto", size="lg"),
-                #dbc.Input(id="weight_input", type="number", placeholder="Type hier je gewicht (kg)",size="lg"),
-                dcc.RadioItems(["Ja", "Nee"], inline=True, className="d-flex justify-content-center", id="vraag2"),
-            # Vraag 3
-            dbc.Label("Lees je regelmatig de krant?", width="auto", size="lg"),
-              #  dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
-                dcc.RadioItems(["Ja", "Nee"], inline=True, className="d-flex justify-content-center", id="vraag3"),
-            # Vraag 5
-            dbc.Label("Geef je de voorkeur aan bellen of emailen / Whatsapp etc.?", width="auto", size="lg"),
-                #dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
-                dcc.RadioItems(options=[
-            {"label": "Bellen", "value": 0},
-            {"label": "Whatsapp etc.", "value": 1},], inline=True, className="d-flex justify-content-center", id="vraag5"),
-            # Vraag 6
-            dbc.Label("Gebruik je bij het sturen van digitale berichten geregeld smileys zoals '😂'?", width="auto", size="lg"),
-               # dbc.Input(id="height_input", type="number", placeholder="Type hier je lengte (cm)",size="lg"),
-                dcc.RadioItems(["Ja", "Nee"], inline=True, className="d-flex justify-content-center", id="vraag6"),
+    dcc.Tabs(
+        id="tabs",
+        value="tab-1",
+        children=[dcc.Tab(label="Begin hier!",value="tab-1",children=[
+                    dbc.Row([dbc.Label(
+                                "Maak je gebruik van Snapchat of Tiktok?",
+                                width="auto",
+                                align="center",
+                                size="lg",
+                            ),
+                            dcc.RadioItems(
+                                ["Ja", "Nee"],
+                                inline=True,
+                                className="d-flex justify-content-center",
+                                id="vraag1",
+                            ),
 
-           # dbc.Button([dbc.Spinner(size="sm", show_initially="False"), "Voorspel leeftijd!"],n_clicks=0, id="submit_button",color="primary", size="lg"),
-            # Verborgen variablen om de input waarden in op te slaan:
-            dcc.Store(id="var_store"),
-            dcc.Store(id="var_store_for_database"),
+                            dbc.Label(
+                                "Heb je ooit een Sony Walkman / discman gekocht?",
+                                width="auto",
+                                size="lg",
+                            ),
+                            dcc.RadioItems(
+                                ["Ja", "Nee"],
+                                inline=True,
+                                className="d-flex justify-content-center",
+                                id="vraag2",
+                            ),
 
-            
-            dbc.Col(
-                html.Div(
-                    [html.Button("Voorspel je leeftijd", className="button", id="submit_button")],  
-                    className="justify-content-center",
-                ),)
+                            dbc.Label(
+                                "Lees je regelmatig de krant?",
+                                width="auto",
+                                size="lg",
+                            ),
+                            dcc.RadioItems(
+                                ["Ja", "Nee"],
+                                inline=True,
+                                className="d-flex justify-content-center",
+                                id="vraag3",
+                            ),
 
-        ],
+                            # Vraag 5
+                            dbc.Label(
+                                "Geef je de voorkeur aan bellen of emailen / Whatsapp etc.?",
+                                width="auto",
+                                size="lg",
+                            ),
+                            dcc.RadioItems(
+                                options=[
+                                    {"label": "Bellen", "value": 0},
+                                    {"label": "Whatsapp etc.", "value": 1},
+                                ],
+                                inline=True,
+                                className="d-flex justify-content-center",
+                                id="vraag5",
+                            ),
 
-        className="g-2", justify="center",
-    )
-        ]),
+                            # Vraag 6
+                            dbc.Label(
+                                "Gebruik je bij het sturen van digitale berichten geregeld smileys zoals '😂'?",
+                                width="auto",
+                                size="lg",
+                            ),
+                            dcc.RadioItems(
+                                ["Ja", "Nee"],
+                                inline=True,
+                                className="d-flex justify-content-center",
+                                id="vraag6",
+                            ),
 
-        # Tabblad om een grafiek met voorgaande voorspellingen te zien.
-        dcc.Tab(label='Voorgaande voorspellingen',value="tab-2", children=[
-        dcc.Graph(id="age_graph"),
-        html.Div(id="age_prediction"),
-        
-        ]),
+                            dcc.Store(id="var_store"),
+                            dcc.Store(id="var_store_for_database"),
+                            dbc.Col(html.Div([
+                                        html.Button(
+                                            "Voorspel je leeftijd",
+                                            className="button",
+                                            id="submit_button",
+                                        )
+                                    ],
+                                    className="justify-content-center",
+                                ),
+                            ),
+                        ],
 
-        
-        # Tab met informatie over het ML model dat gebruikt wordt om de voorspellingen te maken.
-        dcc.Tab(label='Hoe werkt dit?', children=[
-        dcc.Markdown("""
-                    ## SVR model ##
-                    Op de achtergrond wordt een SVR model gebruikt om je leeftijd te voorspellen. 
-                     SVR, "Support Vector Regression".
-                    
-                    ### Betrouwbaarheid ###
-                    De resultaten van een model dat getrained is met data van vijf vragen 
-                    kunnen onbetrouwbaar zijn, dit zou op te lossen zijn door meer vragen toe te voegen.
-                    
-                    ## Correlaties tussen leeftijd en de vragen ##
-                    De paarsgewijze correlaties zijn weergeven op de onderstaande heatmap. 
+                        className="g-2",
+                        justify="center",
+                    )
+                ],
+            ),
 
-                    
+            dcc.Tab(
+                label="Voorgaande voorspellingen",
+                value="tab-2",
+                children=[
+                    dcc.Graph(id="age_graph"),
+                    dcc.Graph(id="age_prediction"),
+                    dcc.Graph(id="db_feature_counts"),
+                ],
+            ),
 
-                    """),
+            dcc.Tab(
+                label="Resultaat",
+                value="tab-4",
+                children=[
+                    dcc.Graph(id="prediction_graph"), 
+                    dbc.Input(
+                                        id="real_age_input",
+                                        type="number",
+                                        min=0,
+                                        placeholder="Voer je werkelijke leeftijd in",
+                                        style={"width": "180px"},
+                                    ),
+                    dbc.Col(
+                                    dbc.Button(
+                                        "Leeftijd opslaan",
+                                        id="real_age_submit",
+                                        color="primary",
+                                        className="ms-2 mt-2",
+                                    ),
+                                    width="auto",),
+                    html.Div(id="age-int"),
+                    html.Div(id="real_age_feedback"),
+                ],
+                style={"padding": "20px"},
+            ),
+            dcc.Tab(
+                label="Hoe werkt dit?",
+                value="tab-3",
+                children=[
+                    dcc.Markdown(
+                        """
+                        ## SVR model ##
+                        Op de achtergrond wordt een SVR (Support Vector Regression) model gebruikt om je leeftijd te voorspellen. 
+                        
+                        
+                        ### Betrouwbaarheid ###
+                        De resultaten van een model dat getrained is met data van vijf vragen 
+                        kunnen onbetrouwbaar zijn, dit zou op te lossen zijn door meer vragen toe te voegen.
+                        Er zijn nu vijf vragen met twee antwoorden per vraag die 2^5 = 32 unieke antwoord combinaties geven.
+                        Als we er van uit gaan dat iedereen die deze vragen invult tussen de 8 en 100 jaar oud is
+                        In het beste geval zit er ongeveer 3 jaar tussen antwoord combinaties ((92-80)/32) = 2,97 jaar.
+                        
+                        
+                        ## Correlaties tussen de vragen ##
+                        De paarsgewijze correlaties zijn weergeven op de onderstaande heatmap. 
+                        """
+                    ),
                     dcc.Graph(id="feature_correlation_graph"),
                      
         ]),
