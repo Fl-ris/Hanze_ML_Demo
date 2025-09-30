@@ -2,7 +2,7 @@
 -- Sqlite3 database voor de enquete vragen  --
 -- Auteur: Floris Menninga                 --
 -- Datum: 01-08-2025                        --
--- Versie: 0.1                              --
+-- Versie: 0.2                              --
 ----------------------------------------------
 
 
@@ -15,5 +15,5 @@ krant boolean, -- Vraag 3: Lees je regelmatig de krant?
 bellen_of_email boolean, -- Vraag 5: Geef je de voorkeur aan bellen of emailen / Whatsapp etc.?
 smileys boolean, -- Vraag 6: Gebruik je bij het sturen van digitale berichten geregeld smileys zoals "😂"
 werkelijke_leeftijd int, -- Klopt de voorspelling (bevestigd door het persoon zelf).
-voorspelde_generatie int -- Hier zal de voorspeling voor dit persoon opgeslagen worden.
+voorspelde_leeftijd int -- Hier zal de voorspeling voor dit persoon opgeslagen worden.
 );
