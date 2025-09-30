@@ -1,12 +1,11 @@
 """"
 Machine learning script
-Gebruikt een SVR model om de leeftijd te voorspellen, deze leeftijd wordt vervolgens
-als generatie (Gen X, Z etc.) aan de gebruiker weergeven aangezien de werkelijke leeftijd niet nauwkeurig genoeg 
-bepaald kan worden aan de hand van 5 vragen.
+Gebruikt een SVR model om de leeftijd te voorspellen.
+Deze leeftijd zal bepaald worden aan de hand van 5 vragen.
 
 Auteur: Floris Menninga
 Datum: 20-07-2025
-Versie: 0.1
+Versie: 0.2
 
 """
 
@@ -14,11 +13,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, ShuffleSplit
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVR
 from sklearn.preprocessing import StandardScaler
 from mapie.regression import MapieRegressor
+from sklearn.metrics import mean_absolute_error
 
 from main import connect_database
 from main import make_dataframe
@@ -61,49 +61,64 @@ def visualize_df(df, df_valid):
 
 
 def train(df):
-
     if df is None:
         db = connect_database()
         df = make_dataframe(db)
 
     mask = df["werkelijke_leeftijd"].notna()
-    n_dropped = (~mask).sum()
-    if n_dropped:
-        df = df.loc[mask]    
+    df = df.loc[mask].copy()
 
-   # features_ordinal = df["telefoon"]
-    features_categorical = df[["social_media","mp3_speler","krant","bellen_of_email","smileys"]]
+    # if len(df) < 1:
+    #     print(f"Niet genoeg data om model te trainen... Maar {len(df)} regels in DF gevonden.")
+    #     joblib.dump({"model": None, "has_interval": False, "mae": None}, TRAINED_MODEL)
+    #     return
 
-    to_predict = df["voorspelde_generatie"]
+    features_categorical = df[["social_media", "mp3_speler", "krant", "bellen_of_email", "smileys"]]
 
-   # X = pd.concat([features_categorical,features_ordinal] , axis=1)
-    X = features_categorical
-
+    X = features_categorical 
     y = df["werkelijke_leeftijd"]
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-    pipeline = Pipeline([
+    base_pipeline = Pipeline([
         ("scaler", StandardScaler()),
         ("SVR", SVR(kernel="linear"))
     ])
-    mapie = MapieRegressor(estimator=pipeline, cv="split", n_jobs=-1)
 
-    mapie.fit(X_train, y_train)
-    y_pred, y_prob_interval = mapie.predict(X_test, alpha=0.05)
-    pipeline.fit(X_train, y_train)
+    joblib_dict = {}
+    fitted_model = None
 
-    lower, upper = mapie.predict(X, alpha=0.05)[1][0]
+    if len(df) < 60:
+        print("Standaard SVR model aan het trainen, niet genoeg data voor MAPIE...")
+        base_pipeline.fit(X_train, y_train)
+        joblib_dict["model"] = base_pipeline
+        joblib_dict["has_interval"] = False
+        fitted_model = base_pipeline
+    else:
+        print("SVR model met MAPIE aan het trainen...")
     
-    joblib_dict = {
-        "pipeline": pipeline,
-        "y_pred": y_pred,
-        "y_prob_interval": y_prob_interval,
-        "lower": lower,
-        "upper": upper,
-    }
+        simple_split = ShuffleSplit(n_splits=1, test_size=0.5, random_state=42)
+        
+        mapie = MapieRegressor(estimator=base_pipeline, cv=simple_split, n_jobs=-1)
+        
+        mapie.fit(X_train, y_train)
+        joblib_dict["model"] = mapie
+        joblib_dict["has_interval"] = True
+        fitted_model = mapie
+
+    y_pred = fitted_model.predict(X_test)
+    if isinstance(y_pred, tuple):
+        y_pred = y_pred[0]
+
+
+    mae = mean_absolute_error(y_test, y_pred)
+    joblib_dict["mae"] = mae
+    
+    print(f"Model evaluatie:")
+    print(f"Mean Absolute Error: {mae:.2f} jaar")
 
     joblib.dump(joblib_dict, TRAINED_MODEL)
+    print("Training van het model klaar.")
 
 
 def load_model():

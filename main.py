@@ -1,3 +1,12 @@
+""""
+Helper functies
+
+Auteur: Floris Menninga
+Datum: 20-07-2025
+Versie: 0.2
+
+"""
+
 import sqlite3
 import pandas as pd
 
