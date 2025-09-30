@@ -116,3 +116,21 @@ content: '';
     transform: translate(-50%, -50%);
     animation: ring 1.5s infinite;
 }
+
+
+.tab:not(.tab--selected) a {
+    color: #bbbbbb !important; 
+    font-weight: normal !important;  
+}
+
+
+.tab--selected a {
+    color: #00FF22 !important; 
+    font-weight: bold !important;
+    text-shadow: 0 0 5px rgba(0, 255, 34, 0.7); 
+}
+
+.tabs {
+    background-color: #1a1a1a; 
+    border-bottom: 2px solid #00FF22; 
+}
