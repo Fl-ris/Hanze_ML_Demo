@@ -4,7 +4,9 @@ Het machine learning model dat gedemonstreerd wordt met dit dashboard zal de lee
 aan de hand van de volgende vragen:
 - Maak je gebruik van Snapchat of Tiktok?
 - Heb je ooit een Sony Walkman / discman gekocht? 
+- Ken je de tafel van 5 uit je hoofd?
 - Lees je regelmatig de krant?
+- Heb je een eigen e-mail adres?
 - Geef je de voorkeur aan bellen of emailen / Whatsapp etc.
 - Gebruik je bij het sturen van digitale berichten geregeld smileys zoals "😂"
 

@@ -42,7 +42,7 @@ def make_dataframe(db):
     return df
 
 
-def commit2database(vraag1,vraag2,vraag3,vraag5,vraag6):
+def commit2database(vraag1,vraag2,vraag3,vraag4,vraag5,vraag6,vraag7):
     """
     Om de nieuwe waarden van het dashboard in de database op te nemen.
     """
@@ -50,8 +50,8 @@ def commit2database(vraag1,vraag2,vraag3,vraag5,vraag6):
     cursor = db.cursor()
 
     #df.to_sql("vragenlijst_data", db, if_exists="append", index=False)
-    cursor.execute("INSERT INTO vragenlijst_data(social_media,mp3_speler,krant,bellen_of_email,smileys) VALUES (?,?,?,?,?)", (vraag1,vraag2,vraag3,vraag5,vraag6))
-    cursor.execute("select * from vragenlijst_data;") # Test
+    cursor.execute("INSERT INTO vragenlijst_data(social_media,mp3_speler,krant,tafel_van_vijf,bellen_of_email,smileys,email) VALUES (?,?,?,?,?,?,?)", (vraag1,vraag2,vraag3,vraag4,vraag5,vraag6,vraag7))
+   # cursor.execute("select * from vragenlijst_data;") # Test
     db.commit()
     db.close()
 

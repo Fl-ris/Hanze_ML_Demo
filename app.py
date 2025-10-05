@@ -16,7 +16,7 @@ from dash import no_update
 import plotly.graph_objects as go
 
 
-from ML import data_check, visualize_df, load_model, predict, train # Imports van het machine learning script.
+from ML import load_model, train # Imports van het machine learning script.
 from main import make_dataframe, connect_database, commit2database # Imports van de helper functies voor de DB en DF.
 
 
@@ -80,6 +80,17 @@ app.layout = html.Div([
                                 className="d-flex justify-content-center",
                                 id="vraag3",
                             ),
+                            dbc.Label(
+                                "Ken je de tafel van 5 uit je hoofd?",
+                                width="auto",
+                                size="lg",
+                            ),
+                            dcc.RadioItems(
+                                ["Ja", "Nee"],
+                                inline=True,
+                                className="d-flex justify-content-center",
+                                id="vraag4",
+                            ),
 
                             # Vraag 5
                             dbc.Label(
@@ -109,7 +120,17 @@ app.layout = html.Div([
                                 className="d-flex justify-content-center",
                                 id="vraag6",
                             ),
-
+                            dbc.Label(
+                                "Heb je een eigen E-mail adres?",
+                                width="auto",
+                                size="lg",
+                            ),
+                            dcc.RadioItems(
+                                ["Ja", "Nee"],
+                                inline=True,
+                                className="d-flex justify-content-center",
+                                id="vraag7",
+                            ),
                             dcc.Store(id="var_store"),
                             dcc.Store(id="var_store_for_database"),
                             dbc.Col(
@@ -208,15 +229,17 @@ app.layout = html.Div([
                         
                         
                         ### Betrouwbaarheid ###
-                        De resultaten van een model dat getrained is met data van vijf vragen 
+                        De resultaten van een model dat getrained is met data van zeven vragen 
                         kunnen onbetrouwbaar zijn, dit zou op te lossen zijn door meer vragen toe te voegen.
-                        Er zijn nu vijf vragen met twee antwoorden per vraag die 2^5 = 32 unieke antwoord combinaties geven.
-                        Als iedereen die deze vragen invult tussen de 8 en 100 jaar oud zou zijn kan het model onderscheid maken tussen
-                        een leeftijdverschil van ~3 jaar ((92-80)/32) = 2,97 jaar, als deze vragen perfect onderscheid kunnen maken tussen leeftijdsgroepen.
+                        Er zijn nu vijf vragen met twee antwoorden per vraag die 2^7 = 128 unieke antwoord combinaties geven.
+                        Als iedereen die deze vragen invult tussen de 0 en 128 jaar oud zou zijn kan het model onderscheid maken tussen de leeftijd van alle deelnemers
+                        als de vragen perfect de leefijden kunnen onderscheiden (wat ze niet kunnen).
+                        
                         
                         
                         ## Correlaties tussen de vragen ##
                         De paarsgewijze correlaties zijn weergeven op de onderstaande heatmap. 
+                        Deze grafiek veranderd met elke nieuwe deelnemer die mee doet!
                         """
                     ),
                     dcc.Graph(id="feature_correlation_graph"),
@@ -233,15 +256,17 @@ app.layout = html.Div([
     Input("vraag1","value"),
     Input("vraag2","value"),
     Input("vraag3","value"),
+    Input("vraag4","value"),
     Input("vraag5","value"),
     Input("vraag6","value"),
+    Input("vraag7","value"),
 )
 
-def submit_button_activate(vraag1,vraag2,vraag3,vraag5,vraag6):
+def submit_button_activate(vraag1,vraag2,vraag3,vraag4,vraag5,vraag6,vraag7):
     """
     Bepaal of de submit knop gebruikt kan worden, alleen wanneer alle waarden in gevuld zijn.
     """
-    if None in [vraag1,vraag2,vraag3,vraag5,vraag6]:
+    if None in [vraag1,vraag2,vraag3,vraag4,vraag5,vraag6,vraag7]:
         return True
     else:
         return False
@@ -253,18 +278,20 @@ def submit_button_activate(vraag1,vraag2,vraag3,vraag5,vraag6):
     State("vraag1","value"),
     State("vraag2","value"),
     State("vraag3","value"),
+    State("vraag4","value"),
     State("vraag5","value"),
     State("vraag6","value"),
+    State("vraag7","value"),
     prevent_initial_call = True
 )
 
-def get_userdata(n_clicks,vraag1,vraag2,vraag3,vraag5,vraag6):
+def get_userdata(n_clicks,vraag1,vraag2,vraag3,vraag4,vraag5,vraag6,vraag7):
 
-    questions = [vraag1,vraag2,vraag3,vraag5,vraag6]
+    questions = [vraag1,vraag2,vraag3,vraag4,vraag5,vraag6,vraag7]
 
     questions = [1 if v=="Ja" else 0 if v=="Nee" else v for v in questions]
 
-    commit2database(questions[0],questions[1],questions[2],questions[3],questions[4]) 
+    commit2database(questions[0],questions[1],questions[2],questions[3],questions[4],questions[5],questions[6]) 
     
     return {"saved": True}
 
@@ -273,14 +300,16 @@ def get_userdata(n_clicks,vraag1,vraag2,vraag3,vraag5,vraag6):
     Output("vraag1","value"),
     Output("vraag2","value"),
     Output("vraag3","value"),
+    Output("vraag4","value"),
     Output("vraag5","value"),
     Output("vraag6","value"),
+    Output("vraag7","value"),
     Input("submit_button","n_clicks"),
     prevent_initial_call=True,
 )
 def reset_questions(_):
     # Reset de radiobuttons na het voorspellen voor de volgende gebruiker:
-    return None, None, None, None, None
+    return None, None, None, None, None, None, None
 
 
 
@@ -326,7 +355,7 @@ def feature_correlation_graph(n_clicks):
     db = connect_database()
     df = make_dataframe(db)
 
-    cols = ["social_media", "mp3_speler", "krant", "bellen_of_email", "smileys"]
+    cols = ["social_media", "mp3_speler", "krant","tafel_van_vijf", "bellen_of_email", "smileys","email"]
     corr = df[cols].corr()
 
 
@@ -350,12 +379,14 @@ def feature_correlation_graph(n_clicks):
     State("vraag1", "value"),
     State("vraag2", "value"),
     State("vraag3", "value"),
+    State("vraag4", "value"),
     State("vraag5", "value"),
     State("vraag6", "value"),
+    State("vraag7", "value"),
     prevent_initial_call=True,
 )
-def prediction(n_clicks, vraag1, vraag2, vraag3, vraag5, vraag6):
-    binary_answers = [vraag1, vraag2, vraag3, vraag5, vraag6]
+def prediction(n_clicks, vraag1, vraag2, vraag3, vraag4, vraag5, vraag6, vraag7):
+    binary_answers = [vraag1, vraag2, vraag3, vraag4, vraag5, vraag6, vraag7]
     processed_answers = []
     for ans in binary_answers:
         if ans == "Ja":
@@ -369,7 +400,7 @@ def prediction(n_clicks, vraag1, vraag2, vraag3, vraag5, vraag6):
 
     joblib_dict = load_model()
     model = joblib_dict["model"]
-    has_interval = joblib_dict.get("has_interval", False)
+    has_interval = joblib_dict.get("has_interval", False) # Als er genoeg data is om met MAPIE te trainen...
 
     predicted_age = 0
     ci_display = ""
@@ -444,7 +475,7 @@ def feature_graph(df: pd.DataFrame):
         fig.update_layout(title_text="Geen data")
         return fig
 
-    binary_cols = ["social_media", "mp3_speler", "krant", "bellen_of_email", "smileys"]
+    binary_cols = ["social_media", "mp3_speler", "krant","tafel_van_vijf", "bellen_of_email", "smileys","email"]
     df_bin = df[binary_cols].replace({0: "Nee", 1: "Ja"})
     melted = df_bin.melt(var_name="vraag", value_name="antwoord")
     counts = (
@@ -491,7 +522,7 @@ def store_real_age(n_clicks, real_age):
     except (ValueError, TypeError):
         return "Ongeldige waarde."
 
-    if not (5 < age_int < 100):
+    if not (2 < age_int < 100):
         return "Is dat wel je leeftijd?"
 
     db = connect_database()
@@ -561,4 +592,4 @@ def update_mae_reporter(tab_value, age_feedback):
         return html.P(report_text, className="text-warning")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
