@@ -8,12 +8,14 @@
 
 create table IF NOT EXISTS vragenlijst_data(
 id integer primary key,
+ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 social_media boolean,  -- Vraag 1: Maak je gebruik van Snapchat of Tiktok?
 mp3_speler boolean, -- Vraag 2: Heb je ooit een Sony Walkman / discman gekocht?
 krant boolean, -- Vraag 3: Lees je regelmatig de krant?
---telefoon char, -- Vraag 4: Wat lijkt het meest op je eerste mobiele telefoon?
+tafel_van_vijf boolean, -- Vraag 4, Ken je de tafel van 5 uit je hoofd?
 bellen_of_email boolean, -- Vraag 5: Geef je de voorkeur aan bellen of emailen / Whatsapp etc.?
 smileys boolean, -- Vraag 6: Gebruik je bij het sturen van digitale berichten geregeld smileys zoals "😂"
+email boolean, -- Vraag 7, Heb je een eigen e-mail adres?
 werkelijke_leeftijd int, -- Klopt de voorspelling (bevestigd door het persoon zelf).
 voorspelde_leeftijd int -- Hier zal de voorspeling voor dit persoon opgeslagen worden.
 );
