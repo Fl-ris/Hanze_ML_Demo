@@ -587,7 +587,7 @@ def update_mae_reporter(tab_value, age_feedback):
 
     if mae is not None:
         report_text = f"Gemiddeld wijken de voorspellingen van dit model {mae:.2f} jaar af van de werkelijke leeftijd."
-        return html.P(report_text)
+        return html.H3(report_text)
     else:
         report_text = "Nog niet genoeg data verzameld om de accuratesse te berekenen."
         return html.P(report_text, className="text-warning")
