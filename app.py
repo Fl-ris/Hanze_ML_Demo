@@ -2,7 +2,7 @@
 Dash dashboard
 Datum: 29-08-2025
 Auteur: Floris Menninga
-Versie: 0.1
+Versie: 0.2
 """
 
 
@@ -120,6 +120,7 @@ app.layout = html.Div([
                                 className="d-flex justify-content-center",
                                 id="vraag6",
                             ),
+                            
                             dbc.Label(
                                 "Heb je een eigen E-mail adres?",
                                 width="auto",

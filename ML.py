@@ -35,15 +35,17 @@ def train(df):
     mask = df["werkelijke_leeftijd"].notna()
     df = df.loc[mask].copy()
 
-    # if len(df) < 1:
-    #     print(f"Niet genoeg data om model te trainen... Maar {len(df)} regels in DF gevonden.")
-    #     joblib.dump({"model": None, "has_interval": False, "mae": None}, TRAINED_MODEL)
-    #     return
 
-    features_categorical = df[["social_media", "mp3_speler", "krant","tafel_van_vijf", "bellen_of_email", "smileys","email"]]
+    feature_cols = ["social_media", "mp3_speler", "krant","tafel_van_vijf", "bellen_of_email", "smileys","email"]
+    df = df.dropna(subset=feature_cols)
 
-    X = features_categorical 
+    X = df[feature_cols]
     y = df["werkelijke_leeftijd"]
+
+    if len(df) < 1:
+        print(f"Niet genoeg data om model te trainen... {len(df)} regels over.")
+        joblib.dump({"model": None, "has_interval": False, "mae": None}, TRAINED_MODEL)
+        return
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -66,7 +68,7 @@ def train(df):
     
         simple_split = ShuffleSplit(n_splits=1, test_size=0.5, random_state=42)
         
-        mapie = MapieRegressor(estimator=base_pipeline, cv=simple_split, n_jobs=-1)
+        mapie = MapieRegressor(estimator=base_pipeline, cv=simple_split, n_jobs=1)
         
         mapie.fit(X_train, y_train)
         joblib_dict["model"] = mapie
